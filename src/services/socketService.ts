@@ -6,9 +6,20 @@ import redis from "../config/redis.js";
 let io: SocketIOServer;
 
 export const initializeSocket = (httpServer: HTTPServer) => {
+  // Socket.IO CORS configuration - match Express CORS
+  const allowedOrigins = [
+    "https://dms-front-xi.vercel.app",
+    "http://localhost:3001",
+    "http://localhost:3000",
+    process.env.FRONTEND_URL,
+    process.env.NEXT_PUBLIC_API_URL?.replace("/api", ""),
+  ].filter(Boolean) as string[];
+
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:3001",
+      origin: process.env.NODE_ENV === "production" 
+        ? allowedOrigins 
+        : true, // Allow all in development
       methods: ["GET", "POST"],
       credentials: true,
     },
